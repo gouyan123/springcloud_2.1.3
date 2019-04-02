@@ -1,7 +1,7 @@
 
 spring:
   application:
-    name: eureka-peer
+    name: eureka-server
   profiles: dev
 
 server:
@@ -17,7 +17,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:10000/eureka/
   server:
-    wait-time-in-ms-when-sync-empty: 0
+    wait-time-in-ms-when-sync-empty: 60
     enable-self-preservation: true
     peer-eureka-nodes-update-interval-ms: 10000
 

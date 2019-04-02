@@ -5,7 +5,6 @@ import com.dn.feigndemo.service.HelloDemoService;
 import org.springframework.stereotype.Component;
 
 /**
- *
  * 定义降级方法，这里直接去实现我们定义的feign接口
  * */
 @Component

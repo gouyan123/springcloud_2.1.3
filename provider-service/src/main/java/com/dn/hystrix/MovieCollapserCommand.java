@@ -1,6 +1,6 @@
-package com.dn.hello.hystrix;
+package com.dn.hystrix;
 
-import com.dn.hello.service.QueryServiceRemoteCall;
+import com.dn.service.QueryServiceRemoteCall;
 import com.netflix.hystrix.*;
 
 import java.util.*;

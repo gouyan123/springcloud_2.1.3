@@ -6,12 +6,12 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 @SpringBootApplication
-@EnableEurekaServer
-//@EnableDiscoveryClient
-public class SpringCloudEurekaApplication {
+//@EnableEurekaServer
+@EnableDiscoveryClient
+public class EurekaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringCloudEurekaApplication.class, args);
+        SpringApplication.run(EurekaApplication.class, args);
     }
 
 }

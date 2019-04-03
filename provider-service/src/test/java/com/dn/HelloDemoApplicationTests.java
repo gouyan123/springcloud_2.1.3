@@ -1,6 +1,6 @@
-package com.dn.hello;
+package com.dn;
 
-import com.dn.hello.service.MovieService;
+import com.dn.service.MovieService;
 import com.netflix.hystrix.strategy.concurrency.HystrixRequestContext;
 import org.junit.After;
 import org.junit.Before;
@@ -8,15 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
 import java.util.Map;
@@ -48,7 +41,7 @@ public class HelloDemoApplicationTests {
     private CountDownLatch countDownLatch = new CountDownLatch(THREAD_NUM);
 
 @Autowired
-    MovieService movieService;
+MovieService movieService;
 
     @Test
     public void benchmark() throws IOException {

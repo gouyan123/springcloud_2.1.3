@@ -1,4 +1,4 @@
-package com.dn.hello.configuration;
+package com.dn.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -18,6 +18,4 @@ public class DataSourceConfigure {
     public DataSource dataSource(){
         return DataSourceBuilder.create().build();
     }
-
-
 }

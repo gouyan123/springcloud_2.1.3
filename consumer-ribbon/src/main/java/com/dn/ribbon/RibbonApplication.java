@@ -16,11 +16,11 @@ import org.springframework.web.client.RestTemplate;
 @EnableEurekaClient
 @EnableCircuitBreaker//客戶端的服務斷路器
 //@RibbonClient(name = "helloclient", configuration = RibbonConfiguration.class)
-public class RibbonDemoApplication {
+public class RibbonApplication {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(RibbonDemoApplication.class, args);
+        SpringApplication.run(RibbonApplication.class, args);
     }
 
 

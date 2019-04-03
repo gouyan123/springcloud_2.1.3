@@ -25,7 +25,7 @@ public class ConsumerController {
     RestTemplate restTemplate;
 
     @GetMapping("")
-    public Object index(@RequestParam("id")String id){
+    public Object index(@RequestParam("id") String id){
 //        return restTemplate.getForObject("http://localhost:8001/user?id="+id+"",Object.class);
 //        return restTemplate.getForObject("http://helloclient/user?id="+id+"",Object.class);
         return new CommandForIndex(id,restTemplate).execute();
@@ -41,7 +41,7 @@ public class ConsumerController {
     @GetMapping("/get-teacher")
     public Object getTeacher(){
 //        return restTemplate.getForEntity("http://localhost:8001",Teacher.class);
-        return restTemplate.getForEntity("http://helloclient",Teacher.class);
+        return restTemplate.getForEntity("http://provider-service",Teacher.class);
     }
 
     public Object callTimeoutFallback(){

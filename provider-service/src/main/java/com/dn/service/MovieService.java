@@ -1,11 +1,10 @@
-package com.dn.hello.service;
+package com.dn.service;
 
-import com.dn.hello.hystrix.MovieCollapserCommand;
+import com.dn.hystrix.MovieCollapserCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service

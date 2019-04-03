@@ -1,4 +1,4 @@
-package com.dn.hello.dao;
+package com.dn.dao;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

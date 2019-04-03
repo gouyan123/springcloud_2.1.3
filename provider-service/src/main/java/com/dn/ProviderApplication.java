@@ -1,12 +1,7 @@
-package com.dn.hello;
+package com.dn;
 
-import com.dn.hello.dao.UseDao;
-import com.dn.hello.service.MovieService;
-import com.dn.hello.service.QueryServiceRemoteCall;
-import com.netflix.hystrix.HystrixCommandProperties;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
-import com.netflix.ribbon.proxy.annotation.Hystrix;
+import com.dn.dao.UseDao;
+import com.dn.service.MovieService;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +24,10 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RefreshScope
 @EnableHystrix
-public class HelloDemoApplication {
+public class ProviderApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HelloDemoApplication.class, args);
+        SpringApplication.run(ProviderApplication.class, args);
     }
 
     private Random random = new Random();

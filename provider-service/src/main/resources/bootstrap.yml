@@ -3,17 +3,22 @@ server:
 spring:
   application:
     name: provider-service
-  cloud:
-    config:
-      name: helloclient
-      uri : http://localhost:5001/
-      username: nick
-      password: 123456
-#      discovery:
-#        service-id: config-server
-#        enabled: true
-  profiles:
-    active: dev
+  datasource:
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&serverTimezone=GMT%2B8&characterEncoding=utf-8
+    driverClassName: com.mysql.jdbc.Driver
+    username: root
+    password: 123456
+#  cloud:
+#    config:
+#      name: provider-service
+#      uri : http://localhost:5001/
+#      username: nick
+#      password: 123456
+##      discovery:
+##        service-id: config-server
+##        enabled: true
+#  profiles:
+#    active: dev
 
 eureka:
   client:

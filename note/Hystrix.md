@@ -502,15 +502,135 @@ return Observable.defer(new Func0<Observable<R>>() {        //走信号量隔离
 }
 
 private Observable<R> getUserExecutionObservable(final AbstractCommand<R> _cmd) {
-        Observable<R> userObservable;
+    Observable<R> userObservable;
 
-        try {
-            userObservable = getExecutionObservable();
-        } catch (Throwable ex) {
-            userObservable = Observable.error(ex);
-        }
-
-        return userObservable
-                .lift(new ExecutionHookApplication(_cmd))
-                .lift(new DeprecatedOnRunHookApplication(_cmd));
+    try {
+        userObservable = getExecutionObservable();      //跟 AbstractCommand#getExecutionObservable()
+    } catch (Throwable ex) {
+        userObservable = Observable.error(ex);
     }
+    return userObservable
+            .lift(new ExecutionHookApplication(_cmd))               //绑定事件
+            .lift(new DeprecatedOnRunHookApplication(_cmd));        //绑定事件
+}
+
+@Override
+final protected Observable<R> getExecutionObservable() {
+    return Observable.defer(new Func0<Observable<R>>() {
+        @Override
+        public Observable<R> call() {
+            try {
+                return Observable.just(run());      //调用 观察者 的run()，run()是抽象方法，有我们自己定义的 实现
+            } catch (Throwable ex) {
+                return Observable.error(ex);
+            }
+        }
+    }).doOnSubscribe(new Action0() {
+        @Override
+        public void call() {
+            // Save thread on which we get subscribed so that we can interrupt it later if needed
+            executionThread.set(Thread.currentThread());
+        }
+    });
+}
+
+跟 AbstractCommand#HystrixObservableTimeoutOperator，理解 超时
+private static class HystrixObservableTimeoutOperator<R> implements Operator<R, R> {
+
+    final AbstractCommand<R> originalCommand;
+
+    public HystrixObservableTimeoutOperator(final AbstractCommand<R> originalCommand) {
+        this.originalCommand = originalCommand;
+    }
+
+    @Override
+    public Subscriber<? super R> call(final Subscriber<? super R> child) {
+        final CompositeSubscription s = new CompositeSubscription();
+        child.add(s);
+
+        final HystrixContextRunnable timeoutRunnable = new HystrixContextRunnable(originalCommand.concurrencyStrategy, new Runnable() {
+
+            @Override
+            public void run() {
+                child.onError(new HystrixTimeoutException());
+            }
+        });
+
+        TimerListener listener = new TimerListener() {      //监听时间
+            @Override
+            public void tick() {
+                if (originalCommand.isCommandTimedOut.compareAndSet(TimedOutStatus.NOT_EXECUTED, TimedOutStatus.TIMED_OUT)) {
+                    originalCommand.eventNotifier.markEvent(HystrixEventType.TIMEOUT, originalCommand.commandKey);
+                    s.unsubscribe();
+                    timeoutRunnable.run();      //调用 run()方法
+                }
+            }
+
+            @Override
+            public int getIntervalTimeInMilliseconds() {
+                return originalCommand.properties.executionTimeoutInMilliseconds().get();
+            }
+        };
+
+        final Reference<TimerListener> tl = HystrixTimer.getInstance().addTimerListener(listener);      //将 监听器注册到当前环境下 跟 HystrixTimer#addTimerListener()
+
+        // set externally so execute/queue can see this
+        originalCommand.timeoutTimer.set(tl);
+
+        /**
+         * If this subscriber receives values it means the parent succeeded/completed
+         */
+        Subscriber<R> parent = new Subscriber<R>() {
+
+            @Override
+            public void onCompleted() {
+                if (isNotTimedOut()) {
+                    // stop timer and pass notification through
+                    tl.clear();
+                    child.onCompleted();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                if (isNotTimedOut()) {
+                    // stop timer and pass notification through
+                    tl.clear();
+                    child.onError(e);
+                }
+            }
+
+            @Override
+            public void onNext(R v) {
+                if (isNotTimedOut()) {
+                    child.onNext(v);
+                }
+            }
+
+            private boolean isNotTimedOut() {
+                // if already marked COMPLETED (by onNext) or succeeds in setting to COMPLETED
+                return originalCommand.isCommandTimedOut.get() == TimedOutStatus.COMPLETED ||
+                        originalCommand.isCommandTimedOut.compareAndSet(TimedOutStatus.NOT_EXECUTED, TimedOutStatus.COMPLETED);
+            }
+        };
+        s.add(parent);
+        return parent;
+    }
+}
+
+public Reference<TimerListener> addTimerListener(final TimerListener listener) {
+    startThreadIfNeeded();
+    Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                listener.tick();        //跟 tick()，在上面
+            } catch (Exception e) {
+                logger.error("Failed while ticking TimerListener", e);
+            }
+        }
+    };
+
+    ScheduledFuture<?> f = executor.get().getThreadPool().scheduleAtFixedRate(r, listener.getIntervalTimeInMilliseconds(), listener.getIntervalTimeInMilliseconds(), TimeUnit.MILLISECONDS);
+    return new TimerReference(listener, f);
+}
